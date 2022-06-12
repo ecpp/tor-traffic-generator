@@ -1,6 +1,6 @@
 # What is this?
 - This python script creates traffic with tor ip addresses. I use it with random-chain proxychains so every traffic looks like it comes from different IP.
-- It is also ability to bruteforce but since it uses tor it will be so slow, I do not recommend it.
+- It has also ability to bruteforce but since it uses tor it will be so slow, I do not recommend it.
 
 # Why I created this?
 It is for my graduation project. To create unique traffics to my honeypots.
