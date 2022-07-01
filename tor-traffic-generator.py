@@ -83,7 +83,7 @@ def mainmenu():
         print("[*] You need to be root to run this script!")
         sys.exit(1)
 
-    print("[*] Welcome to Tor Traffic Generator!")
+    #print("[*] Welcome to Tor Traffic Generator!")
     print("[1] SSH")
     print("[2] HTTP")
     print("[3] FTP")
